@@ -1,6 +1,7 @@
 //Objetivos a serem feitos:
 //Passar as mensagens de erro para ingles.
 //Verificar onde consigo o valor de produndidade
+//deixar para trabalhar com o profundidade dentro da função, e não antes
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -55,8 +56,8 @@ int main(int argc, char *argv[])
                 }
             }
             nColuna /= nLinha; //Pego quantos itens tem dentro do texto, e divido pelo numero de linhas, assim me resulta o número de colunas.
-            char tipo[3] = "P2";
-            matriz *matriz = matriz_create(nLinha, nColuna, profundidade, tipo);
+
+            matriz *matriz = matriz_create(nLinha, nColuna, profundidade);
             if (matriz == NULL)
             {
                 printf("Não foi possível fazer a alocação da matriz.");
@@ -93,8 +94,90 @@ int main(int argc, char *argv[])
     }
     else if (strcmp(argv[1], "-convert") == 0)
     {
-        printf("Converte uma imagem no formato file.txt para o formato file.imm.");
-        
+        printf("Converte uma imagem no formato file.txt para o formato file.imm.\n");
+
+        FILE *file;                 //Abre o arquivo, e o chama de file
+        file = fopen(argv[2], "r"); //Aqui abre o arquivo passado como parâmetro.
+        if (file == NULL)
+        {
+            printf("Error, file txt  not found!");
+            return 0;
+        }
+        //Aqui ta testando quantas linhas tem o arquivo.
+        char c;
+        int nLinha = 1, nColuna = 0;
+        ;
+        while (!feof(file))
+        {
+            c = fgetc(file);
+            if (c == '\n')
+            {
+                nLinha++;
+            }
+        }
+        rewind(file); //Para voltar o arquivo ao início.
+        //Agora calcula quantas colunas tem
+        int aux;
+
+        int profundidade = 0;
+        while (!feof(file))
+        {
+            fscanf(file, "%d", &aux);
+            nColuna++;
+            if (aux > profundidade) //Profundidade vai assumir o maior valor que tem no arquivo.
+            {
+                profundidade = aux;
+            }
+        }
+        nColuna /= nLinha; //Pego quantos itens tem dentro do texto, e divido pelo numero de linhas, assim me resulta o número de colunas.
+
+        matriz *matriz = matriz_create(nLinha, nColuna, profundidade);
+        if (matriz == NULL)
+        {
+            printf("Não foi possível fazer a alocação da matriz.");
+            return 0;
+        }
+        rewind(file); //Para voltar o arquivo ao início.
+
+        int aux2 = 0;
+        while (!feof(file))
+        {
+            for (int i = 0; i < nColuna; i++)
+            {
+                for (int j = 0; j < nLinha; j++)
+                {
+                    fscanf(file, "%d", &aux2);      //Pega os valores do txt
+                    matriz_set(matriz, i, j, aux2); //E joga para dentro da matriz
+                }
+            }
+        }
+        fclose(file);                 //Fecha o arquivo TXT, não vamos mais precisar dele.
+        FILE *file2;                  //Agora vai ser o binario
+        file2 = fopen(argv[3], "wb"); //Aqui abre o arquivo passado como parâmetro.
+        if (file2 == NULL)
+        {
+            printf("Error, file bin  not found or not created!");
+            return 0;
+        }
+
+        matriz_get_dados(matriz, &nColuna, &nLinha, &profundidade);
+
+        fwrite(&nColuna, sizeof(int), 1, file2);
+        fwrite(&nLinha, sizeof(int), 1, file2);
+        fwrite(&profundidade, sizeof(int), 1, file2);
+        int auxmat;
+
+        for (int i = 0; i < nColuna; i++)
+        {
+            for (int j = 0; j < nLinha; j++)
+            {
+                matriz_get(matriz, i, j, &auxmat);
+                fwrite(&aux, sizeof(int), 1, file2);
+            }
+        }
+
+        fclose(file2);
+        matriz_free(matriz); //Desaloca da memória a matriz
     }
     else if (strcmp(argv[1], "-segment") == 0)
     {

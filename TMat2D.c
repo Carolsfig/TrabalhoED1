@@ -5,14 +5,14 @@
 
 struct matriz
 {
-    char tipo[3];
+  
     int profundidade;
     int nrow;
     int ncol;
     int *data;
 };
 
-matriz *matriz_create(int nrow, int ncol, int profundidade, char tipo[3])
+matriz *matriz_create(int nrow, int ncol, int profundidade)
 {
     matriz *auxiliar;
     auxiliar = malloc(sizeof(matriz));
@@ -23,7 +23,6 @@ matriz *matriz_create(int nrow, int ncol, int profundidade, char tipo[3])
     else
     {
         auxiliar->profundidade = profundidade;
-        strcpy(auxiliar->tipo, tipo);
         auxiliar->nrow = nrow;
         auxiliar->ncol = ncol;
         auxiliar->data = malloc(ncol * nrow * sizeof(int));
@@ -148,4 +147,24 @@ void matriz_print(matriz *mat)
         }
         printf("\n");
     }
+}
+
+int matriz_get_dados(matriz *mat, int *column, int *line, int *profundidade)
+{
+    *column = mat->ncol;
+    *line = mat->nrow;
+    *profundidade = mat->profundidade;
+}
+
+int matriz_get_column(matriz *mat, int *column)
+{
+    *column = mat->ncol;
+}
+int matriz_get_line(matriz *mat, int *line)
+{
+    *line = mat->nrow;
+}
+int matriz_get_profundidade(matriz *mat, int *profundidade)
+{
+    *profundidade = mat->profundidade;
 }
