@@ -1,5 +1,6 @@
 //Objetivos a serem feitos:
 //Passar as mensagens de erro para ingles.
+//Verificar onde consigo o valor de produndidade
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -20,7 +21,7 @@ int main(int argc, char *argv[])
         check = strstr(argv[2], ".");   //Joga para dentro do check, todo o texto depois do ".", incluindo o mesmo, por exemplo ".txt"
         if (strcmp(check, ".txt") == 0) //Verifica se o check é igual a .txt
         {
-            FILE *file;//Abre o arquivo, e o chama de file
+            FILE *file;                 //Abre o arquivo, e o chama de file
             file = fopen(argv[2], "r"); //Aqui abre o arquivo passado como parâmetro.
             if (file == NULL)
             {
@@ -41,14 +42,21 @@ int main(int argc, char *argv[])
             }
             rewind(file); //Para voltar o arquivo ao início.
             //Agora calcula quantas colunas tem
-            char aux[50];
+            int aux;
+
+            int profundidade = 0;
             while (!feof(file))
             {
-                fscanf(file, "%s", &aux);
+                fscanf(file, "%d", &aux);
                 nColuna++;
+                if (aux > profundidade) //Profundidade vai assumir o maior valor que tem no arquivo.
+                {
+                    profundidade = aux;
+                }
             }
             nColuna /= nLinha; //Pego quantos itens tem dentro do texto, e divido pelo numero de linhas, assim me resulta o número de colunas.
-            matriz *matriz = matriz_create(nLinha, nColuna);
+            char tipo[3] = "P2";
+            matriz *matriz = matriz_create(nLinha, nColuna, profundidade, tipo);
             if (matriz == NULL)
             {
                 printf("Não foi possível fazer a alocação da matriz.");
@@ -56,21 +64,21 @@ int main(int argc, char *argv[])
             }
             rewind(file); //Para voltar o arquivo ao início.
 
-            double aux2=0;
+            int aux2 = 0;
             while (!feof(file))
             {
                 for (int i = 0; i < nColuna; i++)
                 {
                     for (int j = 0; j < nLinha; j++)
                     {
-                        fscanf(file,"%lf", &aux2);
-                        matriz_set(matriz, i, j,aux2);
+                        fscanf(file, "%d", &aux2);      //Pega os valores do txt
+                        matriz_set(matriz, i, j, aux2); //E joga para dentro da matriz
                     }
                 }
             }
-            matriz_print(matriz);//Essa função vai imprimir na tela a matriz.
-            fclose(file);//Fecha o arquivo.
-            matriz_free(matriz);//Desaloca da memória a matriz
+            matriz_print(matriz); //Essa função vai imprimir na tela a matriz.
+            fclose(file);         //Fecha o arquivo.
+            matriz_free(matriz);  //Desaloca da memória a matriz
         }
 
         else if (strcmp(check, ".imm") == 0)
@@ -86,6 +94,7 @@ int main(int argc, char *argv[])
     else if (strcmp(argv[1], "-convert") == 0)
     {
         printf("Converte uma imagem no formato file.txt para o formato file.imm.");
+        
     }
     else if (strcmp(argv[1], "-segment") == 0)
     {
