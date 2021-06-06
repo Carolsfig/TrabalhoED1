@@ -1,16 +1,18 @@
 #include <stdio.h>
+#include <string.h>
 #include <stdlib.h>
 #include "TMat2D.h"
 
 struct matriz
 {
-
+    char tipo[3];
+    int profundidade;
     int nrow;
     int ncol;
-    double *data;
+    int *data;
 };
 
-matriz *matriz_create(int nrow, int ncol)
+matriz *matriz_create(int nrow, int ncol, int profundidade, char tipo[3])
 {
     matriz *auxiliar;
     auxiliar = malloc(sizeof(matriz));
@@ -20,10 +22,11 @@ matriz *matriz_create(int nrow, int ncol)
     }
     else
     {
-
+        auxiliar->profundidade = profundidade;
+        strcpy(auxiliar->tipo, tipo);
         auxiliar->nrow = nrow;
         auxiliar->ncol = ncol;
-        auxiliar->data = malloc(ncol * nrow * sizeof(double));
+        auxiliar->data = malloc(ncol * nrow * sizeof(int));
         if (auxiliar->data == NULL)
         {
             free(auxiliar);
@@ -48,14 +51,14 @@ int matriz_free(matriz *auxliar)
     }
 }
 
-int matriz_set(matriz *auxliar, int i, int j, double val)
+int matriz_set(matriz *auxliar, int i, int j, int val)
 {
     int aux;
     aux = j * auxliar->ncol + i;
     auxliar->data[aux] = val;
     return 0;
 }
-int matriz_get(matriz *auxiliar, int i, int j, double *val)
+int matriz_get(matriz *auxiliar, int i, int j, int *val)
 {
     int pos;
     pos = j * auxiliar->ncol + i;
@@ -98,7 +101,7 @@ int matriz_escalar(matriz *mat, matriz *escalar, float val)
     return 0;
 }
 
-int matriz_rastro(matriz *mat, double *sum)
+int matriz_rastro(matriz *mat, int *sum)
 {
     for (int i = 0; i < mat->nrow; i++)
     {
@@ -107,7 +110,7 @@ int matriz_rastro(matriz *mat, double *sum)
     return 0;
 }
 
-int matriz_sum_linha(matriz *mat, double *sum)
+int matriz_sum_linha(matriz *mat, int *sum)
 {
     if (mat == NULL)
         return -1;
@@ -120,7 +123,7 @@ int matriz_sum_linha(matriz *mat, double *sum)
     return 0;
 }
 
-int matriz_sum_coluna(matriz *mat, double *sum)
+int matriz_sum_coluna(matriz *mat, int *sum)
 {
     if (mat == NULL)
         return -1;
@@ -135,15 +138,13 @@ int matriz_sum_coluna(matriz *mat, double *sum)
 
 void matriz_print(matriz *mat)
 {
-double aux;
-    printf("\nImprimindo a  matriz\n");
-
+    int aux;
     for (int i = 0; i < mat->ncol; i++)
     {
         for (int j = 0; j < mat->nrow; j++)
         {
             matriz_get(mat, i, j, &aux);
-            printf("%0.lf\t ", aux);
+            printf("%d\t ", aux);
         }
         printf("\n");
     }
