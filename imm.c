@@ -133,17 +133,17 @@ int main(int argc, char *argv[])
         while (!feof(file))
         {
             c = fgetc(file);
-            if (c == '\n')//Se o c for igual a \n, significa que achou final de linha, logo linha++.
+            if (c == '\n') //Se o c for igual a \n, significa que achou final de linha, logo linha++.
             {
                 nLinha++;
             }
         }
         rewind(file); //Para voltar o arquivo ao início para fazer outra verificação.
         //Agora calcula quantas colunas tem
-        int profundidade = 0,aux;
+        int profundidade = 0, aux;
         while (!feof(file))
         {
-            fscanf(file, "%d", &aux);//Sempre que achar um dado, vai salvar.
+            fscanf(file, "%d", &aux); //Sempre que achar um dado, vai salvar.
             nColuna++;
             if (aux > profundidade) //Profundidade vai assumir o maior valor que tem no arquivo.
             {
@@ -152,10 +152,10 @@ int main(int argc, char *argv[])
         }
         nColuna /= nLinha; //Pego quantos itens tem dentro do texto, e divido pelo numero de linhas, assim me resulta o número de colunas.
 
-        matriz *matriz = matriz_create(nLinha, nColuna, profundidade);//Criação de matriz
+        matriz *matriz = matriz_create(nLinha, nColuna, profundidade); //Criação de matriz
         if (matriz == NULL)
         {
-            printf("Não foi possível fazer a alocação da matriz.");//Caso haja algum erro com a matriz.
+            printf("Não foi possível fazer a alocação da matriz."); //Caso haja algum erro com a matriz.
             return 0;
         }
         rewind(file); //Para voltar o arquivo ao início para agora pegar os dados do arquivo e jogar para a matriz.
@@ -183,27 +183,63 @@ int main(int argc, char *argv[])
 
         matriz_get_dados(matriz, &nColuna, &nLinha, &profundidade);
 
-
-        fwrite(&nColuna, sizeof(int), 1, file2);//pega o valor da coluna e coloca no arquivo
-        fwrite(&nLinha, sizeof(int), 1, file2);//pega o valor da linha e coloca no arquivo
-        fwrite(&profundidade, sizeof(int), 1, file2);//pega o valor da profundidade e coloca no arquivo
+        fwrite(&nColuna, sizeof(int), 1, file2);      //pega o valor da coluna e coloca no arquivo
+        fwrite(&nLinha, sizeof(int), 1, file2);       //pega o valor da linha e coloca no arquivo
+        fwrite(&profundidade, sizeof(int), 1, file2); //pega o valor da profundidade e coloca no arquivo
         aux = 0;
         for (int i = 0; i < nColuna; i++)
         {
             for (int j = 0; j < nLinha; j++)
             {
-                matriz_get(matriz, i, j, &aux);//pega o valor da matriz
-                fwrite(&aux, sizeof(int), 1, file2);//E joga para dentro do arquivo no tipo binario.
+                matriz_get(matriz, i, j, &aux);      //pega o valor da matriz
+                fwrite(&aux, sizeof(int), 1, file2); //E joga para dentro do arquivo no tipo binario.
             }
         }
-
-        fclose(file2);//Fecha o arquivo.
+        printf("Conversão feita com sucesso!");
+        fclose(file2);       //Fecha o arquivo.
         matriz_free(matriz); //Desaloca da memória a matriz
     }
     else if (strcmp(argv[1], "-segment") == 0)
     {
-       
-    return 0;
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+        return 0;
     }
     else if (strcmp(argv[1], "-cc") == 0)
     {
