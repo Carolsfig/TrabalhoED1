@@ -64,12 +64,12 @@ int main(int argc, char *argv[])
             int aux2 = 0;
             while (!feof(file))
             {
-                for (int i = 0; i < nColuna; i++)
+                for (int i = 0; i <nLinha ; i++)
                 {
-                    for (int j = 0; j < nLinha; j++)
+                    for (int j = 0; j <nColuna ; j++)
                     {
                         fscanf(file, "%d", &aux2);      //Pega os valores do txt
-                        matriz_set(matriz, i, j, aux2); //E joga para dentro da matriz
+                        matriz_set(matriz, j, i, aux2); //E joga para dentro da matriz
                     }
                 }
             }
@@ -100,12 +100,12 @@ int main(int argc, char *argv[])
                 return 0;
             }
             int aux = 0; //Variável auxiliar.
-            for (int i = 0; i < nColuna; i++)
-            {
-                for (int j = 0; j < nLinha; j++)
+            for (int i = 0; i < nLinha; i++)
                 {
+                    for (int j = 0; j < nColuna; j++)
+                    {
                     fread(&aux, sizeof(int), 1, file); //Pega os valores do arquivo imm que é está alocado na forma de binário.
-                    matriz_set(matriz, i, j, aux);     //Essa linha pega o valor da variável aux, e joga pra dentro da matriz.
+                    matriz_set(matriz,j, i, aux);     //Essa linha pega o valor da variável aux, e joga pra dentro da matriz.
                 }
             }
             matriz_print(matriz); //Imprimindo a matriz.
@@ -163,12 +163,12 @@ int main(int argc, char *argv[])
         aux = 0;
         while (!feof(file))
         {
-            for (int i = 0; i < nColuna; i++)
-            {
-                for (int j = 0; j < nLinha; j++)
+            for (int i = 0; i < nLinha; i++)
                 {
+                    for (int j = 0; j < nColuna; j++)
+                    {
                     fscanf(file, "%d", &aux);      //Pega os valores do txt
-                    matriz_set(matriz, i, j, aux); //E joga para dentro da matriz
+                    matriz_set(matriz, j, i, aux); //E joga para dentro da matriz
                 }
             }
         }
@@ -187,11 +187,11 @@ int main(int argc, char *argv[])
         fwrite(&nLinha, sizeof(int), 1, file2);       //pega o valor da linha e coloca no arquivo
         fwrite(&profundidade, sizeof(int), 1, file2); //pega o valor da profundidade e coloca no arquivo
         aux = 0;
-        for (int i = 0; i < nColuna; i++)
-        {
-            for (int j = 0; j < nLinha; j++)
-            {
-                matriz_get(matriz, i, j, &aux);      //pega o valor da matriz
+        for (int i = 0; i < nLinha; i++)
+                {
+                    for (int j = 0; j < nColuna; j++)
+                    {
+                matriz_get(matriz, j, i, &aux);      //pega o valor da matriz
                 fwrite(&aux, sizeof(int), 1, file2); //E joga para dentro do arquivo no tipo binario.
             }
         }
@@ -202,43 +202,67 @@ int main(int argc, char *argv[])
     else if (strcmp(argv[1], "-segment") == 0)
     {
 
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+        FILE *file;                  //Abre o arquivo, e o chama de file
+        file = fopen(argv[3], "rb"); //Aqui abre o arquivo passado como parâmetro.
+        if (file == NULL)            //Se o arquivo não for encontrado, vai retornar NULL
+        {
+            printf("\nError, file not found1!\n"); //caso o arquivo não seja encontrado.
+            return 0;
+        }
+
+        int nColuna, nLinha, profundidade; //Iniciei essas váriaveis, e vou pegar do arquivo com um fread. Já é sabido quais são os tres primeiros valores do arquivo.
+        fread(&nColuna, sizeof(float), 1, file);
+        fread(&nLinha, sizeof(float), 1, file);
+        fread(&profundidade, sizeof(float), 1, file);
+        matriz *matriz = matriz_create(nLinha, nColuna, profundidade); //Criando a matriz com os valores colhidos.
+
+        if (matriz == NULL) //Se não foi possível criar a matriz.
+        {
+            printf("\nIt was not possible to allocate the matriz.\n");
+            return 0;
+        }
+        int aux = 0; //Variável auxiliar.
+        for (int i = 0; i < nLinha; i++)
+                {
+                    for (int j = 0; j < nColuna; j++)
+                    {
+                fread(&aux, sizeof(int), 1, file); //Pega os valores do arquivo imm que é está alocado na forma de binário.
+                matriz_set(matriz, j, i, aux);     //Essa linha pega o valor da variável aux, e joga pra dentro da matriz.
+            }
+        }
+
+        fclose(file);
+        FILE *file2;
+
+        file2 = fopen(argv[4], "wb"); //Aqui abre o arquivo passado como parâmetro.
+        if (file2 == NULL)            //Se o arquivo não for encontrado, vai retornar NULL
+        {
+            printf("\nError, file not found2!\n"); //caso o arquivo não seja encontrado.
+            return 0;
+        }
+        int thr = atoi(argv[2]);
+        fwrite(&nColuna, sizeof(int), 1, file2);      //pega o valor da coluna e coloca no arquivo
+        fwrite(&nLinha, sizeof(int), 1, file2);       //pega o valor da linha e coloca no arquivo
+        fwrite(&profundidade, sizeof(int), 1, file2); //pega o valor da profundidade e coloca no arquivo
+        for (int i = 0; i < nLinha; i++)
+                {
+                    for (int j = 0; j < nColuna; j++)
+                    {
+                matriz_get(matriz, j, i, &aux);
+                if (aux > thr)
+                {
+                    aux = 1;
+                    fwrite(&aux, sizeof(int), 1, file2);
+                }
+                else
+                {
+                    aux = 0;
+                    fwrite(&aux, sizeof(int), 1, file2);
+                }
+            }
+        }
+        printf("fim");
+
         return 0;
     }
     else if (strcmp(argv[1], "-cc") == 0)

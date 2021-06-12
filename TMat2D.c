@@ -138,11 +138,11 @@ int matriz_sum_coluna(matriz *mat, int *sum)
 void matriz_print(matriz *mat)
 {
     int aux;
-    for (int i = 0; i < mat->ncol; i++)
+    for (int i = 0; i <  mat->nrow; i++)
     {
-        for (int j = 0; j < mat->nrow; j++)
+        for (int j = 0; j <mat->ncol; j++)
         {
-            matriz_get(mat, i, j, &aux);
+            matriz_get(mat, j, i, &aux);
             printf("%d\t ", aux);
         }
         printf("\n");
