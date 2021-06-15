@@ -1,7 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "TMat2D.h" //TAD da matriz
+#include "TMat2D.h"  //TAD da matriz
+#include "TQueue.h"  //TAD da fila
+#include "TADoer.h"  //TAD da leitura e escrita
+#include "TADmain.h" //TAD das funções principais
 
 int main(int argc, char *argv[])
 {
@@ -17,98 +20,18 @@ int main(int argc, char *argv[])
         char *check;                    //Variável utilizada para saber a extensão do arquivo.
         check = strstr(argv[2], ".");   //Joga para dentro do check, todo o texto depois do ".", incluindo o mesmo, por exemplo ".txt"
         if (strcmp(check, ".txt") == 0) //Verifica se o check é igual a .txt
-        {
-            FILE *file;                 //Abre o arquivo, e o chama de file
-            file = fopen(argv[2], "r"); //Aqui abre o arquivo passado como parâmetro.
-            if (file == NULL)
-            {
-                printf("Error, file not found!");
-                return 0;
-            }
-            //Aqui ta testando quantas linhas tem o arquivo.
-            char c;
-            int nLinha = 1, nColuna = 0;
-            ;
-            while (!feof(file))
-            {
-                c = fgetc(file);
-                if (c == '\n')
-                {
-                    nLinha++;
-                }
-            }
-            rewind(file); //Para voltar o arquivo ao início.
-            //Agora calcula quantas colunas tem
-            int aux;
-
-            int profundidade = 0;
-            while (!feof(file))
-            {
-                fscanf(file, "%d", &aux);
-                nColuna++;
-                if (aux > profundidade) //Profundidade vai assumir o maior valor que tem no arquivo.
-                {
-                    profundidade = aux;
-                }
-            }
-            nColuna /= nLinha; //Pego quantos itens tem dentro do texto, e divido pelo numero de linhas, assim me resulta o número de colunas.
-
-            matriz *matriz = matriz_create(nLinha, nColuna, profundidade);
-            if (matriz == NULL)
-            {
-                printf("Não foi possível fazer a alocação da matriz.");
-                return 0;
-            }
-            rewind(file); //Para voltar o arquivo ao início.
-
-            int aux2 = 0;
-            while (!feof(file))
-            {
-                for (int i = 0; i <nLinha ; i++)
-                {
-                    for (int j = 0; j <nColuna ; j++)
-                    {
-                        fscanf(file, "%d", &aux2);      //Pega os valores do txt
-                        matriz_set(matriz, j, i, aux2); //E joga para dentro da matriz
-                    }
-                }
-            }
-            matriz_print(matriz); //Essa função vai imprimir na tela a matriz.
-            fclose(file);         //Fecha o arquivo.
-            matriz_free(matriz);  //Desaloca da memória a matriz
+        {   
+            
+            matriz *mat = read_file_txt(argv[2]);
+            matriz_print(mat); //Essa função vai imprimir na tela a matriz.       //Fecha o arquivo.
+            matriz_free(mat);  //Desaloca da memória a matriz
         }
 
         else if (strcmp(check, ".imm") == 0)
         {
-            FILE *file;                  //Abre o arquivo, e o chama de file
-            file = fopen(argv[2], "rb"); //Aqui abre o arquivo passado como parâmetro.
-            if (file == NULL)            //Se o arquivo não for encontrado, vai retornar NULL
-            {
-                printf("\nError, file not found!\n"); //caso o arquivo não seja encontrado.
-                return 0;
-            }
-
-            int nColuna, nLinha, profundidade; //Iniciei essas váriaveis, e vou pegar do arquivo com um fread. Já é sabido quais são os tres primeiros valores do arquivo.
-            fread(&nColuna, sizeof(float), 1, file);
-            fread(&nLinha, sizeof(float), 1, file);
-            fread(&profundidade, sizeof(float), 1, file);
-            matriz *matriz = matriz_create(nLinha, nColuna, profundidade); //Criando a matriz com os valores colhidos.
-
-            if (matriz == NULL) //Se não foi possível criar a matriz.
-            {
-                printf("\nIt was not possible to allocate the matriz.\n");
-                return 0;
-            }
-            int aux = 0; //Variável auxiliar.
-            for (int i = 0; i < nLinha; i++)
-                {
-                    for (int j = 0; j < nColuna; j++)
-                    {
-                    fread(&aux, sizeof(int), 1, file); //Pega os valores do arquivo imm que é está alocado na forma de binário.
-                    matriz_set(matriz,j, i, aux);     //Essa linha pega o valor da variável aux, e joga pra dentro da matriz.
-                }
-            }
-            matriz_print(matriz); //Imprimindo a matriz.
+            matriz *mat = read_file_imm(argv[2]);
+            matriz_print(mat); //Imprimindo a matriz.
+            matriz_free(mat);
         }
         else //Caso a opção "-open" seja escolhida, mas não tenha achado a extensão.
         {
@@ -118,86 +41,18 @@ int main(int argc, char *argv[])
     }
     else if (strcmp(argv[1], "-convert") == 0)
     {
-        printf("Converte uma imagem no formato file.txt para o formato file.imm.\n");
-
-        FILE *file;                 //Abre o arquivo, e o chama de file
-        file = fopen(argv[2], "r"); //Aqui abre o arquivo passado como parâmetro.
-        if (file == NULL)
+        /*
+        if (argc < 4)
         {
-            printf("Error, file txt  not found!"); //Se não achar o arquivo.
-            return 0;
+            printf("SEM argumentos suficientes");
+            exit(1);
         }
-        //Aqui ta testando quantas linhas tem o arquivo.
-        char c;                      //Vai ser usado para verificar quantas linhas tem.
-        int nLinha = 1, nColuna = 0; //criando as variáveis de linha e coluna, o nLinha começa com +1 porque o código não vai considerar o final do arquivo, pois não tem \n, mas sim o eof.
-        while (!feof(file))
-        {
-            c = fgetc(file);
-            if (c == '\n') //Se o c for igual a \n, significa que achou final de linha, logo linha++.
-            {
-                nLinha++;
-            }
+        int res;//Só para verificar o resultado.
+        res=convert(argv[2],argv[3]);
+        if(res==1){
+            printf("Conversão feita com sucesso!");
         }
-        rewind(file); //Para voltar o arquivo ao início para fazer outra verificação.
-        //Agora calcula quantas colunas tem
-        int profundidade = 0, aux;
-        while (!feof(file))
-        {
-            fscanf(file, "%d", &aux); //Sempre que achar um dado, vai salvar.
-            nColuna++;
-            if (aux > profundidade) //Profundidade vai assumir o maior valor que tem no arquivo.
-            {
-                profundidade = aux;
-            }
-        }
-        nColuna /= nLinha; //Pego quantos itens tem dentro do texto, e divido pelo numero de linhas, assim me resulta o número de colunas.
-
-        matriz *matriz = matriz_create(nLinha, nColuna, profundidade); //Criação de matriz
-        if (matriz == NULL)
-        {
-            printf("Não foi possível fazer a alocação da matriz."); //Caso haja algum erro com a matriz.
-            return 0;
-        }
-        rewind(file); //Para voltar o arquivo ao início para agora pegar os dados do arquivo e jogar para a matriz.
-
-        aux = 0;
-        while (!feof(file))
-        {
-            for (int i = 0; i < nLinha; i++)
-                {
-                    for (int j = 0; j < nColuna; j++)
-                    {
-                    fscanf(file, "%d", &aux);      //Pega os valores do txt
-                    matriz_set(matriz, j, i, aux); //E joga para dentro da matriz
-                }
-            }
-        }
-        fclose(file);                 //Fecha o arquivo TXT.
-        FILE *file2;                  //Arquivo binario
-        file2 = fopen(argv[3], "wb"); //Aqui abre o arquivo passado como parâmetro.
-        if (file2 == NULL)
-        {
-            printf("Error, file bin  not found or not created!");
-            return 0;
-        }
-
-        matriz_get_dados(matriz, &nColuna, &nLinha, &profundidade);
-
-        fwrite(&nColuna, sizeof(int), 1, file2);      //pega o valor da coluna e coloca no arquivo
-        fwrite(&nLinha, sizeof(int), 1, file2);       //pega o valor da linha e coloca no arquivo
-        fwrite(&profundidade, sizeof(int), 1, file2); //pega o valor da profundidade e coloca no arquivo
-        aux = 0;
-        for (int i = 0; i < nLinha; i++)
-                {
-                    for (int j = 0; j < nColuna; j++)
-                    {
-                matriz_get(matriz, j, i, &aux);      //pega o valor da matriz
-                fwrite(&aux, sizeof(int), 1, file2); //E joga para dentro do arquivo no tipo binario.
-            }
-        }
-        printf("Conversão feita com sucesso!");
-        fclose(file2);       //Fecha o arquivo.
-        matriz_free(matriz); //Desaloca da memória a matriz
+        */
     }
     else if (strcmp(argv[1], "-segment") == 0)
     {
@@ -210,11 +65,10 @@ int main(int argc, char *argv[])
             return 0;
         }
 
-        int nColuna, nLinha, profundidade; //Iniciei essas váriaveis, e vou pegar do arquivo com um fread. Já é sabido quais são os tres primeiros valores do arquivo.
+        int nColuna, nLinha; //Iniciei essas váriaveis, e vou pegar do arquivo com um fread. Já é sabido quais são os tres primeiros valores do arquivo.
         fread(&nColuna, sizeof(float), 1, file);
         fread(&nLinha, sizeof(float), 1, file);
-        fread(&profundidade, sizeof(float), 1, file);
-        matriz *matriz = matriz_create(nLinha, nColuna, profundidade); //Criando a matriz com os valores colhidos.
+        matriz *matriz = matriz_create(nLinha, nColuna); //Criando a matriz com os valores colhidos.
 
         if (matriz == NULL) //Se não foi possível criar a matriz.
         {
@@ -223,9 +77,9 @@ int main(int argc, char *argv[])
         }
         int aux = 0; //Variável auxiliar.
         for (int i = 0; i < nLinha; i++)
-                {
-                    for (int j = 0; j < nColuna; j++)
-                    {
+        {
+            for (int j = 0; j < nColuna; j++)
+            {
                 fread(&aux, sizeof(int), 1, file); //Pega os valores do arquivo imm que é está alocado na forma de binário.
                 matriz_set(matriz, j, i, aux);     //Essa linha pega o valor da variável aux, e joga pra dentro da matriz.
             }
@@ -241,13 +95,12 @@ int main(int argc, char *argv[])
             return 0;
         }
         int thr = atoi(argv[2]);
-        fwrite(&nColuna, sizeof(int), 1, file2);      //pega o valor da coluna e coloca no arquivo
-        fwrite(&nLinha, sizeof(int), 1, file2);       //pega o valor da linha e coloca no arquivo
-        fwrite(&profundidade, sizeof(int), 1, file2); //pega o valor da profundidade e coloca no arquivo
+        fwrite(&nColuna, sizeof(int), 1, file2); //pega o valor da coluna e coloca no arquivo
+        fwrite(&nLinha, sizeof(int), 1, file2);  //pega o valor da linha e coloca no arquivo
         for (int i = 0; i < nLinha; i++)
-                {
-                    for (int j = 0; j < nColuna; j++)
-                    {
+        {
+            for (int j = 0; j < nColuna; j++)
+            {
                 matriz_get(matriz, j, i, &aux);
                 if (aux > thr)
                 {
@@ -267,7 +120,145 @@ int main(int argc, char *argv[])
     }
     else if (strcmp(argv[1], "-cc") == 0)
     {
-        printf("Detecta os componentes conexos de uma imagem");
+        printf("Detecta os componentes conexos de uma imagem\n");
+        if (argc < 4)
+        {
+            printf("SEM argumentos suficientes");
+            exit(1);
+            ////////////////COLOCAR UM RETURN AQUI
+        }
+
+        FILE *file;                  //Abre o arquivo, e o chama de file
+        file = fopen(argv[2], "rb"); //Aqui abre o arquivo passado como parâmetro.
+        if (file == NULL)            //Se o arquivo não for encontrado, vai retornar NULL
+        {
+            printf("\nError, file not found1!\n"); //caso o arquivo não seja encontrado.
+            return 0;
+        }
+
+        int nColuna, nLinha; //Iniciei essas váriaveis, e vou pegar do arquivo com um fread. Já é sabido quais são os tres primeiros valores do arquivo.
+        fread(&nColuna, sizeof(float), 1, file);
+        fread(&nLinha, sizeof(float), 1, file);
+        matriz *mat = matriz_create(nLinha, nColuna); //Criando a matriz com os valores colhidos.
+        matriz *mat_rot = matriz_create(nLinha, nColuna);
+        if (mat == NULL) //Se não foi possível criar a matriz.
+        {
+            printf("\nIt was not possible to allocate the matriz.\n");
+            return 0;
+        }
+        int aux = 0;                     //Variável auxiliar.
+        for (int i = 0; i < nLinha; i++) //zerando a segunda matriz
+        {
+            for (int j = 0; j < nColuna; j++)
+            {
+                matriz_set(mat_rot, i, j, aux); //Essa linha pega o valor da variável aux, e joga pra dentro da matriz.
+            }
+        }
+
+        for (int i = 0; i < nLinha; i++)
+        {
+            for (int j = 0; j < nColuna; j++)
+            {
+                fread(&aux, sizeof(int), 1, file); //Pega os valores do arquivo imm que é está alocado na forma de binário.
+                matriz_set(mat, i, j, aux);        //Essa linha pega o valor da variável aux, e joga pra dentro da matriz.
+            }
+        }
+        matriz_print(mat_rot);
+        printf("\n");
+        matriz_print(mat);
+        fclose(file);
+        // considerando que a borda da imagem são zeros
+        // im - imagem original
+        // im_rot - imagem rotulada - inicialmente zerada
+        aux = 0;
+        int aux2 = 0;
+        int label = 1;
+        DQNode *lista_proximos = queue_create();
+        struct Ponto p, p_atual;
+        /*
+        for (int i = 1; i < nLinha - 1; i++)
+        {
+            for (int j = 1; j < nColuna - 1; j++)
+            {
+
+                // percorre toda a imagem em busca de um pixel foreground (valor 1)
+                p.x = i;
+                p.y = j;
+                matriz_get(mat, i, j, &aux);
+                matriz_get(mat_rot, i, j, &aux2);
+                if (aux == 1 && aux2 == 0)
+                {
+                    // atribui o label a posição (i,j)
+
+                    
+                    // inclui na lista de busca dos vizinhos
+                    queue_push(lista_proximos, p);
+                    while (!queue_empty(lista_proximos))
+                    {
+                        // busca o próximo ponto da lista
+                        queue_pop(lista_proximos, &p_atual); //tem que fazer o pop e retornar o que foi popado
+
+                        // buscando por pixels na vizinhança do ponto atual que são iguais a 1
+                        // ponto acima
+                        p.x = p_atual.x - 1;
+                        p.y = p_atual.y;
+                        // verifica if o ponto acima não é um e não foi rotulado
+                        matriz_get(mat, p.x,p.y, &aux);
+                        matriz_get(mat_rot, p.x,p.y, &aux2);
+                        if (aux == 1 && aux2 == 0){
+                            // atribui o label a posição atual
+                            matriz_set(mat_rot, i, j, label);
+                            // adiciona o ponto na lista para verificar vizinhos posteriormente
+                            queue_push(lista_proximos, p);
+                        }
+                        // ponto abaixo
+                        p.x = p_atual.x + 1;
+                        p.y = p_atual.y;
+                        matriz_get(mat, p.x,p.y, &aux);
+                        matriz_get(mat_rot, p.x,p.y, &aux2);
+                        if (aux == 1 && aux2 == 0){
+                            // atribui o label a posição atual
+                            matriz_set(mat_rot, i, j, label);
+                            // adiciona o ponto na lista para verificar vizinhos posteriormente
+                            queue_push(lista_proximos, p);
+                        }
+                        // ponto à esquerda
+                        p.x = p_atual.x;
+                        p.y = p_atual.y - 1;
+                        matriz_get(mat, p.x,p.y, &aux);
+                        matriz_get(mat_rot, p.x,p.y, &aux2);
+                        if (aux == 1 && aux2 == 0){
+                            // atribui o label a posição atual
+                            matriz_set(mat_rot, i, j, label);
+                            // adiciona o ponto na lista para verificar vizinhos posteriormente
+                            queue_push(lista_proximos, p);
+                        }
+                        // ponto à direita
+                        p.x = p_atual.x;
+                        p.y = p_atual.y + 1;
+                        matriz_get(mat, p.x,p.y, &aux);
+                        matriz_get(mat_rot, p.x,p.y, &aux2);
+                        if (aux == 1 && aux2 == 0){
+                            // atribui o label a posição atual
+                            matriz_set(mat_rot, i, j, label);
+                            // adiciona o ponto na lista para verificar vizinhos posteriormente
+                            queue_push(lista_proximos, p);
+                        }
+                    } // enquanto
+                    label = label + 1;
+                } // if
+            }
+        }
+        
+
+
+    matriz_print(mat);
+    printf("\n");
+    matriz_print(mat_rot);
+
+
+
+*/
     }
     else if (strcmp(argv[1], "-lab") == 0)
     {
